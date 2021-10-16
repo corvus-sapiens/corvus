@@ -48,7 +48,14 @@ class ColoredFormatter(logging.Formatter):
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def get_colored_logger(scriptname: str, log_dir: str = "./logs", level=logging.DEBUG, to_stdout: bool = False, persist: bool = True, pid: bool = False) -> logging.LoggerAdapter:
+def get_colored_logger(
+        scriptname: str,
+        log_dir: str = "./logs",
+        level=logging.DEBUG,
+        to_stdout: bool = False,
+        persist: bool = True,
+        pid: bool = False
+) -> logging.LoggerAdapter:
     """Instantiate a logger that colors messages based on their log level.
     :param scriptname: name to be displayed as the origin for log messages
     :param log_dir: where to put log messages in the filesystem
