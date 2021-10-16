@@ -50,7 +50,7 @@ load-plugins=
 # Pickle collected data for later comparisons.
 persistent=yes
 
-# Min Python version to use for version dependend checks. Will default to the
+# Min Python version to use for version-dependent checks. Will default to the
 # version used to run pylint.
 py-version=3.9
 
@@ -207,7 +207,9 @@ good-names=i,
            ex,
            Run,
            _,
-           df
+           df,
+           fh,
+           ch
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
@@ -484,7 +486,7 @@ valid-metaclass-classmethod-first-arg=cls
 ignored-parents=
 
 # Maximum number of arguments for function / method.
-max-args=5
+max-args=7
 
 # Maximum number of attributes for a class (see R0902).
 max-attributes=7
