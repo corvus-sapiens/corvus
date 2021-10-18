@@ -3,3 +3,10 @@ mypy
 pylint
 
 wheel
+
+humanfriendly
+python-magic
+sqlalchemy
+sqlalchemy-stubs
+pandas
+pandas-stubs
