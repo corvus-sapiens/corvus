@@ -26,7 +26,7 @@ def get_cmd_output(cmd: str) -> dict:
         shell=True,
         capture_output=True,
         text=True,
-        check=True
+        check=False
     )
 
     return {"rc": proc.returncode, "stdout": proc.stdout.strip(), "stderr": proc.stderr.strip()}
