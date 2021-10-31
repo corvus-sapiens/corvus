@@ -127,14 +127,15 @@ def parse_pgpass(path: str, logger: logging.LoggerAdapter) -> dict:
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
 def upsert_orm(orm_cls, attributes: Dict[str, Any], engine: sqlalchemy.engine.Engine, pkey: ORMPrimaryKey, logger: logging.LoggerAdapter) -> Any:
     """
-    Emulate an UPSERT (UPdate/inSERT) operation for a row in an ORM-defined SQL table
+    Emulate an UPSERT (UPdate/inSERT) operation for a row in an ORM-defined SQL table.
 
     :param orm_cls: class object, extending SQLAlchemy Base to represent a SQL table
-    :param attributes: property_name->value mapping to be setattr'ed on an instance of the ``orm_cls`` class
-    :param engine: a SQLAlchemy engine (connection factory)
-    :param pkey: a namedtuple that stores a non-composite PrimaryKey for the SQL table, represented by ``orm_cls``
+    :param attributes: {property_name->value} mapping to be setattr'ed on an instance of the ``orm_cls`` class
+    :param engine: a SQLAlchemy engine (a connection factory)
+    :param pkey: a namedtuple that stores a non-composite primary key for the SQL table represented by ``orm_cls``
     :param logger: an configured logging.Logger object
-    :returns: None
+    :returns: PK value of the upserted entity
+    :raises: sqlalchemy.exc.IntegrityError, AttributeError
     """
 
     logger.debug(f"Received an ORM object: '{orm_cls.__tablename__}' ({orm_cls.__name__})")
@@ -149,9 +150,11 @@ def upsert_orm(orm_cls, attributes: Dict[str, Any], engine: sqlalchemy.engine.En
             .first()
         )
 
+        ## Found no row in the table with the given PK
         if not instance:
             logger.debug(f"Entry not found, will run an INSERT operation: '{pkey.attribute}:{pkey.value}'")
             instance = orm_cls(**{pkey.attribute: pkey.value})
+        ## PK is already in the table
         else:
             logger.debug(f"Entry discovered, will run an UPDATE operation: '{pkey.attribute}:{pkey.value}'")
 
