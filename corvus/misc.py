@@ -82,13 +82,20 @@ def log_obj_instantiation(obj, logger: logging.LoggerAdapter, addendum: str = ""
     :param addendum: supplementary string message
     :return: None
     """
-    name = obj.__name__
+
     classname = obj.__class__.__name__
+
+    try:
+        name = obj.__name__
+    except AttributeError:
+        name = ""
+
     id_ = id(obj)
+
     try:
         pid = obj.pid
     except AttributeError:
-        logger.warning(f"Class interface lacks the ``pid`` property: '{classname}'")
+        logger.debug(f"Class interface lacks the ``pid`` property: '{classname}'")
         pid = None
 
-    logger.info(f"New instance of '{name}' ('{classname}'), id: {id_}; pid: {pid}. {addendum}".strip())
+    logger.info(f"New instance of '{classname}': name={name}, id={id_}, pid={pid}. {addendum}".strip())
