@@ -1,6 +1,7 @@
 """Miscellaneous utility functions."""
 
 import os
+import logging
 from typing import Dict
 
 from corvus import cmd
@@ -25,6 +26,7 @@ class NotAGitRepository(Exception):
         return f"({cls_name}) {self.message}: {self.dir_target}"
 
 
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
 class GitUnexpectedError(Exception):
     """Raised when git returns an unexpected error."""
     def __init__(self, error_msg: str, dir_target: str):
@@ -69,3 +71,24 @@ def current_git_commit(dir_target: str = "") -> Dict[str, str]:
     branch = rev_parse["stdout"]
 
     return {"commit": commit, "branch": branch}
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def log_obj_instantiation(obj, logger: logging.LoggerAdapter, addendum: str = "") -> None:
+    """
+    Emit a log message with the given logger, reporting a new instance of an object.
+    :param obj: instance to base the report on
+    :param logger: logger instance
+    :param addendum: supplementary string message
+    :return: None
+    """
+    name = obj.__name__
+    classname = obj.__class__.__name__
+    id_ = id(obj)
+    try:
+        pid = obj.pid
+    except AttributeError:
+        logger.warning(f"Class interface lacks the ``pid`` property: '{classname}'")
+        pid = None
+
+    logger.info(f"New instance of '{name}' ('{classname}'), id: {id_}; pid: {pid}. {addendum}".strip())
