@@ -88,7 +88,7 @@ def log_obj_instantiation(obj, logger: logging.LoggerAdapter, addendum: str = ""
     try:
         name = obj.__name__
     except AttributeError:
-        name = ""
+        name = None
 
     id_ = id(obj)
 
