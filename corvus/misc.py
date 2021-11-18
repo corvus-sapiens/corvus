@@ -99,3 +99,13 @@ def log_obj_instantiation(obj, logger: logging.LoggerAdapter, addendum: str = ""
         pid = None
 
     logger.info(f"New instance of '{classname}': name={name}, id={id_}, pid={pid}. {addendum}".strip())
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def ascii2qtask_id(ascii: str) -> str:
+    return "".join([chr(int(c)) for c in ascii.split("-")])
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def qtask_id2ascii(qtask_id: str, delim: str = "-") -> str:
+    return delim.join([str(ord(c)) for c in qtask_id])
