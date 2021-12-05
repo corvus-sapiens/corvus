@@ -1,6 +1,7 @@
 flake8
 mypy
 pylint
+pytest
 
 wheel
 
@@ -10,3 +11,5 @@ sqlalchemy
 sqlalchemy-stubs
 pandas
 pandas-stubs
+xxhash
+types-xxhash

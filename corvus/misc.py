@@ -2,6 +2,8 @@
 
 import os
 import logging
+import xxhash
+
 from typing import Dict
 
 from corvus import cmd
@@ -109,3 +111,14 @@ def ascii2qtask_id(ascii: str) -> str:
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
 def qtask_id2ascii(qtask_id: str, delim: str = "-") -> str:
     return delim.join([str(ord(c)) for c in qtask_id])
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def get_xxhash(path: str) -> str:
+    x = xxhash.xxh32()
+
+    with open(path, "rb") as file:
+        contents = file.read()
+        x.update(contents)
+
+    return x.hexdigest()
