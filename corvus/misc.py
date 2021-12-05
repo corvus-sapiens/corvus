@@ -1,10 +1,10 @@
 """Miscellaneous utility functions."""
 
-import os
 import logging
-import xxhash
-
+import os
 from typing import Dict
+
+import xxhash
 
 from corvus import cmd
 
@@ -51,7 +51,7 @@ class GitUnexpectedError(Exception):
 ## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
 def current_git_commit(dir_target: str = "") -> Dict[str, str]:
     """
-    Using git via a shell fork, extract current branch and commit hash.
+    Using git via a shell fork, extract current branch and commit hashes.
     :returns: a branch and commit hash dict
     :raises: NotAGitRepository
     """
@@ -114,7 +114,12 @@ def qtask_id2ascii(qtask_id: str, delim: str = "-") -> str:
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def get_xxhash(path: str) -> str:
+def get_xxhash32(path: str) -> str:
+    """
+    Return an xxhash-32 hash digest of file.
+    :param path: path to the file
+    :return: an 8 ASCII-character wide string
+    """
     x = xxhash.xxh32()
 
     with open(path, "rb") as file:
