@@ -90,7 +90,7 @@ def get_pg_engine(path_pgpass: str, logger: logging.LoggerAdapter, application_n
     db_settings = parse_pgpass(path=path_pgpass, logger=logger)
     params = {k.strip(): v for k, v in db_settings.copy().items() if k != "db_password"}
     logger.debug(f"DB connection parameters: {params}")
-    db_url = "postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?application_name={}".format(
+    db_url = "postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?application_name={application_name}".format(
         application_name=application_name,
         **db_settings
     )
