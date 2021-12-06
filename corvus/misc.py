@@ -26,7 +26,7 @@ class NotAGitRepository(Exception):
 
     def __repr__(self):
         cls_name = self.__class__.__name__
-        return f"({cls_name}) {self.message}: {self.dir_target}"
+        return f"({cls_name}) {self.message}: '{self.dir_target}'"
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
@@ -46,7 +46,8 @@ class GitUnexpectedError(Exception):
 
     def __repr__(self):
         cls_name = self.__class__.__name__
-        return f"({cls_name}) {self.message}: {self.dir_target}"
+        return f"({cls_name}) {self.message}: '{self.dir_target}'"
+
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
 class BadConfigurationFile(Exception):
@@ -93,6 +94,7 @@ class MissingConfigurationFile(Exception):
 def current_git_commit(dir_target: str = "") -> Dict[str, str]:
     """
     Using git via a shell fork, extract current branch and commit hashes.
+
     :returns: a branch and commit hash dict
     :raises: NotAGitRepository
     """
@@ -120,6 +122,7 @@ def current_git_commit(dir_target: str = "") -> Dict[str, str]:
 def log_obj_instantiation(obj, logger: logging.LoggerAdapter, addendum: str = "") -> None:
     """
     Emit a log message with the given logger, reporting a new instance of an object.
+
     :param obj: instance to base the report on
     :param logger: logger instance
     :param addendum: supplementary string message
@@ -158,6 +161,7 @@ def qtask_id2ascii(qtask_id: str, delim: str = "-") -> str:
 def get_xxhash32(path: str) -> str:
     """
     Return an xxhash-32 hash digest of file.
+
     :param path: path to the file
     :return: an 8 ASCII-character wide string
     """
