@@ -175,7 +175,7 @@ def get_xxhash32(path: str) -> str:
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool = True) -> dict:
+def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool = True, dir_: str = "") -> dict:
     """
     Look for a given filename in typical locations and parse it as a JSON file.
     First of all, the function will attempt to look in the directory defined in
@@ -195,16 +195,25 @@ def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool 
 
     logger.debug(f"Expecting a configuration file with name: '{file_name}'")
 
-    for location in (
-        os.environ.get(f"{prefix.upper()}_CONFIG") or "",
-        os.path.abspath(os.curdir),
-        os.path.expanduser("~"),
-        os.path.expanduser(f"~/.local/share/{prefix}"),
-        f"/etc/{prefix}"
-    ):
+    ## Choose valid paths from the following set
+    locations = filter(
+        lambda d: d is not None and os.path.isdir(d),
+        set((
+            dir_,
+            os.environ.get(f"{prefix.upper()}_CONFIG") or "",
+            os.path.abspath(os.path.dirname(__file__)),
+            os.path.abspath(os.curdir),
+            os.path.expanduser("~"),
+            os.path.expanduser(f"~/.local/share/{prefix}"),
+            f"/etc/{prefix}"
+        ))
+    )
+
+    ## Look for the file in each valid location
+    for location in locations:
+        path_config = os.path.join(location, file_name)
 
         try:
-            path_config = os.path.join(location, file_name)
             with open(path_config, encoding="utf-8") as file:
                 try:
                     config = json.load(file)
@@ -216,7 +225,6 @@ def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool 
                     raise BadConfigurationFile(err_message, path_config)
         except IOError:
             logger.debug(f"'{file_name}' not found under: '{location}'; trying next location ...")
-            pass
 
     err_message = "Configuration file not found"
     logger.critical(f"{err_message}: '{file_name}'. Aborting.")

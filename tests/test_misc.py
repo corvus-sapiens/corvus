@@ -54,3 +54,14 @@ def test_discover_config_env_empty(monkeypatch):
 
     with pytest.raises(misc.BadConfigurationFile):
         misc.discover_config(name="test_empty", logger=logger)
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def test_discover_config():
+    expected = {
+        "topicA": {"a": 0},
+        "topicB": {"b": 1}
+    }
+    actual = misc.discover_config(name="test", logger=logger, dir_="tests")
+
+    assert actual == expected
