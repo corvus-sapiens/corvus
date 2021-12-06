@@ -1,5 +1,6 @@
 """Miscellaneous utility functions."""
 
+import json
 import logging
 import os
 from typing import Dict
@@ -46,6 +47,46 @@ class GitUnexpectedError(Exception):
     def __repr__(self):
         cls_name = self.__class__.__name__
         return f"({cls_name}) {self.message}: {self.dir_target}"
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+class BadConfigurationFile(Exception):
+    """Raised when configuration file cannot be parsed as expected."""
+
+    def __init__(self, error_msg: str, dir_target: str):
+        """
+        :param error_msg: description of the error
+        :param dir_target: location of the malformed configuration file
+        """
+        self.dir_target = dir_target
+        self.message = error_msg
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"{self.message}: '{self.dir_target}'"
+
+    def __repr__(self):
+        cls_name = self.__class__.__name__
+        return f"({cls_name}) {self.message}: '{self.dir_target}'"
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+class MissingConfigurationFile(Exception):
+    """Raised when configuration file cannot be found."""
+
+    def __init__(self, error_msg: str, filename: str):
+        """
+        :param error_msg: description of the error
+        """
+        self.filename = filename
+        self.message = error_msg
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"{self.message}: '{self.filename}'"
+
+    def __repr__(self):
+        cls_name = self.__class__.__name__
+        return f"({cls_name}) {self.message}: '{self.filename}'"
 
 
 ## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
@@ -127,3 +168,52 @@ def get_xxhash32(path: str) -> str:
         x.update(contents)
 
     return x.hexdigest()
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool = True) -> dict:
+    """
+    Look for a given filename in typical locations and parse it as a JSON file.
+    First of all, the function will attempt to look in the directory defined in
+    the <PREFIX>_CONFIG env variable, where <PREFIX> is the extensionless `name`.
+
+    :param name: name of the configuration file
+    :param logger: a logging.LoggerAdapter instance
+    :param from_prefix: build a config file name by replacing the extension with '.cfg.json'
+    :return: a dictionary representation of a JSON file
+    """
+    if from_prefix:
+        prefix = os.path.splitext(os.path.basename(name))[0]
+        file_name = f"{prefix}.cfg.json"
+    else:
+        prefix = ""
+        file_name = name
+
+    logger.debug(f"Expecting a configuration file with name: '{file_name}'")
+
+    for location in (
+        os.environ.get(f"{prefix.upper()}_CONFIG") or "",
+        os.path.abspath(os.curdir),
+        os.path.expanduser("~"),
+        os.path.expanduser(f"~/.local/share/{prefix}"),
+        f"/etc/{prefix}"
+    ):
+
+        try:
+            path_config = os.path.join(location, file_name)
+            with open(path_config, encoding="utf-8") as file:
+                try:
+                    config = json.load(file)
+                    logger.info(f"Using configuration file: '{os.path.realpath(path_config)}'")
+                    return config
+                except Exception as error:
+                    err_message = f"Failed to parse configuration file: '{path_config}'"
+                    logger.critical(f"{err_message} ({repr(error)}). Aborting.")
+                    raise BadConfigurationFile(err_message, path_config)
+        except IOError:
+            logger.debug(f"'{file_name}' not found under: '{location}'; trying next location ...")
+            pass
+
+    err_message = "Configuration file not found"
+    logger.critical(f"{err_message}: '{file_name}'. Aborting.")
+    raise MissingConfigurationFile(err_message, file_name)
