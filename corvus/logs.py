@@ -51,7 +51,7 @@ class ColoredFormatter(logging.Formatter):
 def get_colored_logger(
         scriptname: str,
         log_dir: str = "./logs",
-        level=logging.DEBUG,
+        level=logging.INFO,
         to_stdout: bool = False,
         persist: bool = True,
         pid: bool = False
