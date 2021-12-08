@@ -201,7 +201,6 @@ def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool 
         set((
             dir_,
             os.environ.get(f"{prefix.upper()}_CONFIG") or "",
-            os.path.abspath(os.path.dirname(__file__)),
             os.path.abspath(os.curdir),
             os.path.expanduser("~"),
             os.path.expanduser(f"~/.local/share/{prefix}"),
