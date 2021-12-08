@@ -1,5 +1,15 @@
 flake8
 mypy
 pylint
+pytest
 
 wheel
+
+humanfriendly
+python-magic
+sqlalchemy
+sqlalchemy-stubs
+pandas
+pandas-stubs
+xxhash
+types-xxhash
