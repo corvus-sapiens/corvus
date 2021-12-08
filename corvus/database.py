@@ -1,6 +1,7 @@
 """Functions that ease the pain of working with databases (primarily PostgreSQL)."""
 
 import logging
+import sys
 from collections import namedtuple
 from typing import List, Dict, Any
 
@@ -86,10 +87,21 @@ WHERE i.indrelid = '"{table_name}"'::regclass
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def get_pg_engine(path_pgpass: str, logger: logging.LoggerAdapter, application_name: str = "") -> sqlalchemy.engine.Engine:
+def get_pg_engine(path_pgpass: str, application_name: str = "", logger: logging.LoggerAdapter = None) -> sqlalchemy.engine.Engine:
+    """
+    Create a SQLAlchemy connection engine for a PostgreSQL database, using .pgpass credentials.
+
+    :param path_pgpass: path to a .pgpass file
+    :param logger: a logging.LoggerAdapter instance (default=None)
+    :param application_name: a string to identify your app to the database
+    :return: sqlalchemy.engine.Engine instance
+    """
     db_settings = parse_pgpass(path=path_pgpass, logger=logger)
     params = {k.strip(): v for k, v in db_settings.copy().items() if k != "db_password"}
-    logger.debug(f"DB connection parameters: {params}")
+
+    if logger:
+        logger.debug(f"DB connection parameters: {params}")
+
     db_url = "postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?application_name={application_name}".format(
         application_name=application_name,
         **db_settings
@@ -105,9 +117,10 @@ def get_sqlite_engine(db_path: str, logger: logging.LoggerAdapter) -> sqlalchemy
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def parse_pgpass(path: str, logger: logging.LoggerAdapter) -> dict:
+def parse_pgpass(path: str, logger: logging.LoggerAdapter = None) -> dict:
     """
     Return a dict of SQLAlchemy settings for the psycopg2 driver.
+
     :param path: where to look for the .pgpass file
     :param logger: a logging.LoggerAdapter instance
     :return: a dictionary of credentials
@@ -123,7 +136,11 @@ def parse_pgpass(path: str, logger: logging.LoggerAdapter) -> dict:
             "db_password": db_password,
         }
     except Exception as error:
-        logger.error(f"Failed to parse the .pgpass file ({str(error)}): {path}")
+        err_message = f"Failed to parse the .pgpass file ({str(error)}): {path}"
+        if logger:
+            logger.error(err_message)
+        else:
+            sys.stderr.write(f"{err_message}\n")
         return {}
 
 
