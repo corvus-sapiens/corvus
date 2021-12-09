@@ -19,6 +19,8 @@ def has_stabilized_hash(filename: str, max_seconds: int = -1, logger: logging.Lo
         new = get_xxhash32(filename)
 
         if new == old:
+            if logger:
+                logger.info(f"Digest stabilized for file (xxhash32): '{filename}'")
             return True
 
         if logger:
