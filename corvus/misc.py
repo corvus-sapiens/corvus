@@ -6,6 +6,7 @@ import os
 from typing import Dict
 
 import xxhash
+import requests
 
 from corvus import cmd
 
@@ -228,3 +229,25 @@ def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool 
     err_message = "Configuration file not found"
     logger.critical(f"{err_message}: '{file_name}'. Aborting.")
     raise MissingConfigurationFile(err_message, file_name)
+
+
+def ping_healthchecks(uuid: str, logger: logging.LoggerAdapter, status: str = "") -> None:
+    """
+    Send an HTTP ping to the `healthchecks.io`.
+
+    :param healthcheck_uuid: healthchecks.io-provided identifier of an API endpoint
+    :param status: additional signal, signifying execution outcome
+    :param logger: a logging.LoggerAdapter instance
+    """
+
+    if status and status not in ("start", "fail"):
+        logger.error(f"Received unknown status: '{status}'. Skipping.")
+        return
+
+    hc_url = f"https://hc-ping.com/{uuid}{'/' + status if status else ''}"
+
+    try:
+        logger.info(f"({status.strip('/') or 'OK'}) Sending a heartbeat ping to: '{hc_url}' ...")
+        requests.get(url=hc_url, timeout=10)
+    except requests.RequestException as error:
+        logger.error(f"Ping failed ({error}): '{hc_url}{status}'")
