@@ -231,13 +231,14 @@ def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool 
     raise MissingConfigurationFile(err_message, file_name)
 
 
-def ping_healthchecks(uuid: str, logger: logging.LoggerAdapter, status: str = "") -> None:
+def ping_healthchecks(uuid: str, logger: logging.LoggerAdapter, status: str = "", quiet: bool = False) -> None:
     """
     Send an HTTP ping to the `healthchecks.io`.
 
     :param healthcheck_uuid: healthchecks.io-provided identifier of an API endpoint
     :param status: additional signal, signifying execution outcome
     :param logger: a logging.LoggerAdapter instance
+    :param quiet: log only errors
     """
 
     if status and status not in ("start", "fail"):
@@ -247,7 +248,8 @@ def ping_healthchecks(uuid: str, logger: logging.LoggerAdapter, status: str = ""
     hc_url = f"https://hc-ping.com/{uuid}{'/' + status if status else ''}"
 
     try:
-        logger.info(f"({status.strip('/') or 'OK'}) Sending a heartbeat ping to: '{hc_url}' ...")
+        if not quiet:
+            logger.info(f"({status.strip('/') or 'OK'}) Sending a heartbeat ping to: '{hc_url}' ...")
         requests.get(url=hc_url, timeout=10)
     except requests.RequestException as error:
         logger.error(f"Ping failed ({error}): '{hc_url}{status}'")
