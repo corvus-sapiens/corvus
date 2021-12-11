@@ -6,7 +6,7 @@ import setuptools  # type: ignore
 with open("VERSION", "r", encoding="utf-8") as file:
     version = file.read().strip()
 
-with open("pip-requirements.txt", "r", encoding="utf8") as file:
+with open("requirements.txt", "r", encoding="utf8") as file:
     requirements = [line.strip() for line in file if line]
 
 setuptools.setup(
