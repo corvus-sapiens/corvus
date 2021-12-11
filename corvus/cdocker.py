@@ -11,7 +11,7 @@ import docker  # type: ignore
 from docker.errors import ImageNotFound  # type: ignore
 
 
-def images_exists(name: str, tag: str) -> bool:
+def image_exists(name: str, tag: str) -> bool:
     """
     Check if a Docker image with a given `name`:`tag` combination exists.
 

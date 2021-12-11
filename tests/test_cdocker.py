@@ -17,7 +17,7 @@ def test_image_exists_true(name, tag, expected):
         remove=True
     )
 
-    actual = cdocker.images_exists(name, tag)
+    actual = cdocker.image_exists(name, tag)
 
     assert actual == expected
 
@@ -27,7 +27,7 @@ def test_image_exists_true(name, tag, expected):
     ("busybox", "non-existent-tag", False)
 ])
 def test_image_exists_false(name, tag, expected):
-    actual = cdocker.images_exists(name, tag)
+    actual = cdocker.image_exists(name, tag)
     assert actual == expected
 
 
