@@ -7,8 +7,8 @@ __author__ = "Alexander Gorelyshev"
 __email__ = "alexander.gorelyshev@pm.me"
 
 
-import docker
-from docker.errors import ImageNotFound
+import docker  # type: ignore
+from docker.errors import ImageNotFound  # type: ignore
 
 
 def images_exists(name: str, tag: str) -> bool:

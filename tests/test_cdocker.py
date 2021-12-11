@@ -1,4 +1,4 @@
-import docker
+import docker  # type: ignore
 import pytest
 
 from corvus import cdocker
