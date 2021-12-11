@@ -1,4 +1,4 @@
-"""Tests for the corvus package."""
+"""Tests for the corvus.misc package."""
 
 import logging
 
@@ -6,7 +6,6 @@ import pytest
 
 from corvus import logs
 from corvus import misc
-
 
 logger = logs.get_colored_logger(scriptname=__file__, level=logging.DEBUG, persist=False)
 

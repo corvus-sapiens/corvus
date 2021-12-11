@@ -13,3 +13,6 @@ pandas
 pandas-stubs
 xxhash
 types-xxhash
+
+requests
+types-requests
