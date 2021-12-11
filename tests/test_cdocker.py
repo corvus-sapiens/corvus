@@ -29,3 +29,26 @@ def test_image_exists_true(name, tag, expected):
 def test_image_exists_false(name, tag, expected):
     actual = cdocker.images_exists(name, tag)
     assert actual == expected
+
+
+def test_get_image_labels():
+    expected = {
+        "maintainer.email": "alexander.gorelyshev@pm.me",
+        "maintainer": "Alexander Gorelyshev",
+        "description": "A mock container with nothing but labels in it",
+        "software.version": "0.0.1",
+        "dockerfile.version": "1",
+        "base.image": "scratch"
+    }
+
+    dclient = docker.from_env()
+    dclient.images.build(
+        tag="scratch-labels:latest",
+        path="tests",
+        dockerfile="scratch-labels.Dockerfile",
+        forcerm=True,
+        nocache=True
+    )
+
+    actual = cdocker.get_image_labels("scratch-labels", "latest")
+    assert actual == expected

@@ -19,3 +19,15 @@ def images_exists(name: str, tag: str) -> bool:
         return False
 
     return True
+
+
+def get_image_labels(name: str, tag: str) -> dict:
+    """
+    Return a dictionary of Docker image labels.
+
+    :param name: image name
+    :param tag: image tag
+    :return: a dictionary of Docker image labels
+    """
+    dclient = docker.from_env()
+    return dclient.images.get(f"{name}:{tag or 'latest'}").labels
