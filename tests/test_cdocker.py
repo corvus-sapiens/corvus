@@ -23,7 +23,8 @@ def test_image_exists_true(name, tag, expected):
 
 
 @pytest.mark.parametrize("name,tag,expected", [
-    ("non-existent-image", "1.0.0", False)
+    ("non-existent-image", "1.0.0", False),
+    ("busybox", "non-existent-tag", False)
 ])
 def test_image_exists_false(name, tag, expected):
     actual = cdocker.images_exists(name, tag)
