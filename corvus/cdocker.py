@@ -1,3 +1,12 @@
+"""Helper functions for the Docker SDK.
+
+REF https://docker-py.readthedocs.io/
+"""
+
+__author__ = "Alexander Gorelyshev"
+__email__ = "alexander.gorelyshev@pm.me"
+
+
 import docker
 from docker.errors import ImageNotFound
 
