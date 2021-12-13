@@ -1,7 +1,8 @@
 """Tests for the corvus.misc package."""
 
 import logging
-
+import os
+import tempfile
 import pytest
 
 from corvus import logs
@@ -63,3 +64,51 @@ def test_discover_config():
     actual = misc.discover_config(name="test", logger=logger, dir_="tests")
 
     assert actual == expected
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def test_purge_dir_contents():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        file_path = os.path.join(tmpdir, "test.txt")
+        subdir_path = os.path.join(tmpdir, "test-dir")
+        symlink_path = os.path.join(tmpdir, "symlink-test.txt")
+
+        open(file_path, "a", encoding="ascii").close()
+        os.mkdir(subdir_path)
+        os.symlink(file_path, symlink_path)
+
+        count = len([name for name in os.listdir(tmpdir)])
+        print(f"Total file count in {tmpdir}: {count}")
+
+        misc.purge_dir_contents(tmpdir)
+
+        expected = 0
+        actual = len([name for name in os.listdir(tmpdir)])
+
+    assert actual == expected
+
+
+def test_purge_dir_contents_no_follow_symlinks() -> None:
+    """
+    Make sure removing the symlink leaves the source file intact.
+
+    :return None:
+    """
+    ## Create a file, a subdir, then a symlink to the file in the subdir
+    with tempfile.TemporaryDirectory() as tmpdir:
+        file_path = os.path.join(tmpdir, "test.txt")
+        subdir_path = os.path.join(tmpdir, "test-dir")
+        symlink_path = os.path.join(subdir_path, "symlink-test.txt")
+
+        os.mkdir(subdir_path)
+        open(file_path, "a", encoding="ascii").close()
+        os.symlink(file_path, symlink_path)
+
+        assert os.path.exists(file_path)
+        assert os.path.exists(symlink_path)
+
+        ## ...then remove everything (the symlink) in the subdir
+        misc.purge_dir_contents(subdir_path)
+
+        ## ...and make sure the file the link was pointing at, still exists
+        assert os.path.exists(file_path)

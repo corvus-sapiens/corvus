@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import shutil
 from typing import Dict
 
 import xxhash
@@ -253,3 +254,18 @@ def ping_healthchecks(uuid: str, logger: logging.LoggerAdapter, status: str = ""
         requests.get(url=hc_url, timeout=10)
     except requests.RequestException as error:
         logger.error(f"Ping failed ({error}): '{hc_url}{status}'")
+
+
+def purge_dir_contents(target_dir: str) -> None:
+    """
+    Remove all files (incl. directories and symlinks) under the `target_dir`.
+
+    :param target_dir: the directory to be purged of content
+    :return: None
+    """
+    with os.scandir(target_dir) as entries:
+        for entry in entries:
+            if entry.is_dir() and not entry.is_symlink():
+                shutil.rmtree(entry.path)
+            else:
+                os.remove(entry.path)
