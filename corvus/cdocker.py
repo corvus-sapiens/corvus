@@ -6,30 +6,34 @@ REF https://docker-py.readthedocs.io/
 __author__ = "Alexander Gorelyshev"
 __email__ = "alexander.gorelyshev@pm.me"
 
+import logging
 
 import docker  # type: ignore
 from docker.errors import ImageNotFound  # type: ignore
 
 
-def image_exists(name: str, tag: str) -> bool:
+def image_exists(name: str, tag: str, logger: logging.LoggerAdapter = None) -> bool:
     """
     Check if a Docker image with a given `name`:`tag` combination exists.
 
     :param name: image name
     :param tag: image tag (e.g., version, "latest", etc.)
-    :return: True if the image exists, false otherwise
+    :param logger: logging.LoggerAdapter instance
+    :return: True if the image exists, False otherwise
     """
     dclient = docker.client.from_env()
 
     try:
         _ = dclient.images.get(f"{name}:{tag or 'latest'}")
     except ImageNotFound:
-        print("not found")
+        if logger:
+            logger.error(f"Docker image not available: '{name}:{tag}'")
         return False
 
     return True
 
 
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
 def get_image_labels(name: str, tag: str) -> dict:
     """
     Return a dictionary of Docker image labels.
