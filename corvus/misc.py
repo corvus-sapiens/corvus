@@ -13,6 +13,20 @@ from corvus import cmd
 
 
 ## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
+ANSI_COLORS = {
+    "black": "\u001b[30m",
+    "red": "\u001b[31m",
+    "green": "\u001b[32m",
+    "yellow": "\u001b[33m",
+    "blue": "\u001b[34m",
+    "magenta": "\u001b[35m",
+    "cyan": "\u001b[36m",
+    "white": "\u001b[37m",
+    "reset": "\u001b[0m"
+}
+
+
+## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
 class NotAGitRepository(Exception):
     """Raised when working directory is not a git repo (and neither any of the parents)."""
     def __init__(self, dir_target: str):
@@ -232,6 +246,7 @@ def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool 
     raise MissingConfigurationFile(err_message, file_name)
 
 
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
 def ping_healthchecks(uuid: str, logger: logging.LoggerAdapter, status: str = "", quiet: bool = False) -> None:
     """
     Send an HTTP ping to the `healthchecks.io`.
@@ -256,6 +271,7 @@ def ping_healthchecks(uuid: str, logger: logging.LoggerAdapter, status: str = ""
         logger.error(f"Ping failed ({error}): '{hc_url}{status}'")
 
 
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
 def purge_dir_contents(target_dir: str) -> None:
     """
     Remove all files (incl. directories and symlinks) under the `target_dir`.
@@ -269,3 +285,14 @@ def purge_dir_contents(target_dir: str) -> None:
                 shutil.rmtree(entry.path)
             else:
                 os.remove(entry.path)
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def colorize(text: str, name: str, bright: bool = False) -> str:
+    color = ANSI_COLORS[name]
+
+    if bright:
+        color = color.replace("m", ";1m")
+
+    reset = ANSI_COLORS["reset"]
+    return f"{color}{text}{reset}"
