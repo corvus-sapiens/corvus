@@ -22,6 +22,8 @@ ANSI_COLORS = {
     "magenta": "\u001b[35m",
     "cyan": "\u001b[36m",
     "white": "\u001b[37m",
+    "reversed": "\u001b[7m",
+    "bold": "\u001b[1m",
     "reset": "\u001b[0m"
 }
 
@@ -288,11 +290,15 @@ def purge_dir_contents(target_dir: str) -> None:
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def colorize(text: str, name: str, bright: bool = False) -> str:
+def colorize(text: str, name: str, bright: bool = False, reverse: bool = False, bold: bool = False) -> str:
     color = ANSI_COLORS[name]
 
     if bright:
         color = color.replace("m", ";1m")
+    if bold:
+        color = color + ANSI_COLORS["bold"]
+    if reverse:
+        color = color + ANSI_COLORS["reversed"]
 
     reset = ANSI_COLORS["reset"]
     return f"{color}{text}{reset}"
