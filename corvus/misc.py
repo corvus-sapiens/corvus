@@ -12,6 +12,26 @@ import requests
 from corvus import cmd
 
 
+## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
+class VersionFlagNotImplemented(Exception):
+    """Raised when an executable does not implement the --version flag."""
+
+    def __init__(self, path: str, stderr: str, rc: str):
+        self.path = path
+        self.stderr = stderr.strip()
+        self.rc = rc
+        self.message = f"Version flag not implemented: '{path}', return code {rc}) <- {stderr}"
+        super().__init__(self.message)
+
+
+    def __str__(self):
+        return self.message
+
+
+    def __repr__(self):
+        return "({}) {}".format(self.__class__.__name__, self.message)
+
+
 ## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
 ANSI_COLORS = {
     "black": "\u001b[30m",
@@ -302,3 +322,28 @@ def colorize(text: str, name: str, bright: bool = False, reverse: bool = False, 
 
     reset = ANSI_COLORS["reset"]
     return f"{color}{text}{reset}"
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def get_bin_version(path: str, logger: logging.LoggerAdapter) -> str:
+    """
+    Return the 1st stdout line from calling the executable with '--version'.
+
+    :param path: path of the executable binary file to be checked
+    :param logger: an instance of logging.LoggerAdapter
+    :raises: NoVersionFlagImplemented
+    :returns: string, containing the first line of stdout
+    """
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Invalid executable path: '{path}'")
+
+    output = cmd.get_cmd_output(f"{path} --version")
+
+    if output["rc"] != 0:
+        logger.error(output['stderr'])
+        raise VersionFlagNotImplemented(path=path, stderr=output['stderr'], rc=output['rc'])
+
+    version_string = output['stdout'].strip().split("\n")[0]
+    logger.info(f"Detected usable {os.path.basename(path)} ({version_string})")
+
+    return version_string
