@@ -8,6 +8,7 @@ import pytest
 from corvus import logs
 from corvus import misc
 
+
 logger = logs.get_colored_logger(scriptname=__file__, level=logging.DEBUG, persist=False)
 
 
@@ -112,3 +113,19 @@ def test_purge_dir_contents_no_follow_symlinks() -> None:
 
         ## ...and make sure the file the link was pointing at, still exists
         assert os.path.exists(file_path)
+
+
+def test_get_bin_version_ok() -> None:
+    actual = bool(misc.get_bin_version("/bin/ps", logger=logger))
+
+    assert actual is True
+
+
+def test_get_bin_version_raises_filenotfounderror() -> None:
+    with pytest.raises(FileNotFoundError):
+        misc.get_bin_version("/bin/non-existent", logger=logger)
+
+
+def test_get_bin_version_raises_versionflagnotimplemented() -> None:
+    with pytest.raises(misc.VersionFlagNotImplemented):
+        misc.get_bin_version("/bin/false", logger=logger)
