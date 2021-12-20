@@ -3,12 +3,49 @@
 import json
 import logging
 import os
+import shutil
 from typing import Dict
 
 import xxhash
 import requests
 
 from corvus import cmd
+
+
+## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
+class VersionFlagNotImplemented(Exception):
+    """Raised when an executable does not implement the --version flag."""
+
+    def __init__(self, path: str, stderr: str, rc: str):
+        self.path = path
+        self.stderr = stderr.strip()
+        self.rc = rc
+        self.message = f"Version flag not implemented: '{path}', return code {rc}) <- {stderr}"
+        super().__init__(self.message)
+
+
+    def __str__(self):
+        return self.message
+
+
+    def __repr__(self):
+        return "({}) {}".format(self.__class__.__name__, self.message)
+
+
+## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
+ANSI_COLORS = {
+    "black": "\u001b[30m",
+    "red": "\u001b[31m",
+    "green": "\u001b[32m",
+    "yellow": "\u001b[33m",
+    "blue": "\u001b[34m",
+    "magenta": "\u001b[35m",
+    "cyan": "\u001b[36m",
+    "white": "\u001b[37m",
+    "reversed": "\u001b[7m",
+    "bold": "\u001b[1m",
+    "reset": "\u001b[0m"
+}
 
 
 ## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
@@ -231,6 +268,7 @@ def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool 
     raise MissingConfigurationFile(err_message, file_name)
 
 
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
 def ping_healthchecks(uuid: str, logger: logging.LoggerAdapter, status: str = "", quiet: bool = False) -> None:
     """
     Send an HTTP ping to the `healthchecks.io`.
@@ -253,3 +291,59 @@ def ping_healthchecks(uuid: str, logger: logging.LoggerAdapter, status: str = ""
         requests.get(url=hc_url, timeout=10)
     except requests.RequestException as error:
         logger.error(f"Ping failed ({error}): '{hc_url}{status}'")
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def purge_dir_contents(target_dir: str) -> None:
+    """
+    Remove all files (incl. directories and symlinks) under the `target_dir`.
+
+    :param target_dir: the directory to be purged of content
+    :return: None
+    """
+    with os.scandir(target_dir) as entries:
+        for entry in entries:
+            if entry.is_dir() and not entry.is_symlink():
+                shutil.rmtree(entry.path)
+            else:
+                os.remove(entry.path)
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def colorize(text: str, name: str, bright: bool = False, reverse: bool = False, bold: bool = False) -> str:
+    color = ANSI_COLORS[name]
+
+    if bright:
+        color = color.replace("m", ";1m")
+    if bold:
+        color = color + ANSI_COLORS["bold"]
+    if reverse:
+        color = color + ANSI_COLORS["reversed"]
+
+    reset = ANSI_COLORS["reset"]
+    return f"{color}{text}{reset}"
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def get_bin_version(path: str, logger: logging.LoggerAdapter) -> str:
+    """
+    Return the 1st stdout line from calling the executable with '--version'.
+
+    :param path: path of the executable binary file to be checked
+    :param logger: an instance of logging.LoggerAdapter
+    :raises: NoVersionFlagImplemented
+    :returns: string, containing the first line of stdout
+    """
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Invalid executable path: '{path}'")
+
+    output = cmd.get_cmd_output(f"{path} --version")
+
+    if output["rc"] != 0:
+        logger.error(output['stderr'])
+        raise VersionFlagNotImplemented(path=path, stderr=output['stderr'], rc=output['rc'])
+
+    version_string = output['stdout'].strip().split("\n")[0]
+    logger.info(f"Detected usable {os.path.basename(path)} ({version_string})")
+
+    return version_string
