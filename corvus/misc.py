@@ -5,11 +5,27 @@ import logging
 import os
 import shutil
 from typing import Dict
+from collections import namedtuple
+from datetime import datetime as dt
 
+import magic
 import xxhash
 import requests
+from humanfriendly import format_size
 
 from corvus import cmd
+
+
+## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
+FileReport = namedtuple("FileReport", [
+    "exists",
+    "bytes",
+    "human",
+    "description",
+    "mime",
+    "created",
+    "modified"
+])
 
 
 ## ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ##
@@ -347,3 +363,42 @@ def get_bin_version(path: str, logger: logging.LoggerAdapter) -> str:
     logger.info(f"Detected usable {os.path.basename(path)} ({version_string})")
 
     return version_string
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def get_file_report(path: str) -> FileReport:
+    """Build a comment on a path, including size, other (optional) info and attach a message.
+    :param path: path to be analyzed
+    :returns: Dict containing information about the file under the `path`
+    """
+    report = {
+        "exists": False,
+        "bytes": None,
+        "human": None,
+        "description": None,
+        "mime": None,
+        "created": None,
+        "modified": None
+    }
+
+    if not os.path.isfile(path):
+        return FileReport(**report)
+    else:
+        report["exists"] = True
+
+    status = os.stat(path)
+
+    report["bytes"] = status.st_size
+    report["human"] = format_size(report["bytes"])
+
+    ctime = status.st_ctime
+    mtime = status.st_mtime
+
+    report["created"] = dt.strftime(dt.fromtimestamp(ctime), "%Y-%m-%d %H:%M:%S")
+    report["modified"] = dt.strftime(dt.fromtimestamp(mtime), "%Y-%m-%d %H:%M:%S")
+
+    with open(path, "rb") as file:
+        report["description"] = magic.from_buffer(file.read(2048))
+        report["mime"] = magic.from_buffer(file.read(2048), mime=True)
+
+    return FileReport(**report)
