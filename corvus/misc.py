@@ -352,7 +352,7 @@ def get_bin_version(path: str, logger: logging.LoggerAdapter) -> str:
     :returns: string, containing the first line of stdout
     """
     if not os.path.exists(path):
-        raise FileNotFoundError(f"Invalid executable path: '{path}'")
+        raise FileNotFoundError(f"Could not execute name or path: '{path}'")
 
     output = cmd.get_cmd_output(f"{path} --version")
 
