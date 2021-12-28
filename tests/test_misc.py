@@ -129,3 +129,35 @@ def test_get_bin_version_raises_filenotfounderror() -> None:
 def test_get_bin_version_raises_versionflagnotimplemented() -> None:
     with pytest.raises(misc.VersionFlagNotImplemented):
         misc.get_bin_version("/bin/false", logger=logger)
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def test_get_file_report_txt():
+    expected = misc.FileReport(
+        exists=True,
+        bytes=2940,
+        human="2.94 KB",
+        description="ASCII text, with very long lines",
+        mime="text/plain",
+        created="2021-12-11 17:45:37",
+        modified="2021-12-11 17:45:37"
+    )
+
+    actual = misc.get_file_report("tests/lorem-ipsum.txt")
+    assert expected == actual
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def test_get_file_report_non_existent():
+    expected = misc.FileReport(
+        exists=False,
+        bytes=None,
+        human=None,
+        description=None,
+        mime=None,
+        created=None,
+        modified=None
+    )
+
+    actual = misc.get_file_report("non-existent-file.xyz")
+    assert expected == actual
