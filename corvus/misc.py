@@ -250,10 +250,9 @@ def discover_config(name: str, logger: logging.LoggerAdapter, use_prefix: bool =
 
     logger.debug(f"Expecting a configuration file with name: '{file_name}'")
 
-    ## Choose valid paths from the following set
+    ## Choose valid paths from the following tuple
     locations = filter(
         lambda d: d is not None and os.path.isdir(d),
-        set((
         (
             location,
             os.environ.get(f"{prefix.upper()}_CONFIG") or "",
@@ -261,7 +260,7 @@ def discover_config(name: str, logger: logging.LoggerAdapter, use_prefix: bool =
             os.path.expanduser("~"),
             os.path.expanduser(f"~/.local/share/{prefix}"),
             f"/etc/{prefix}"
-        ))
+        )
     )
 
     ## Look for the file in each valid location
