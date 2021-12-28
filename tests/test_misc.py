@@ -27,7 +27,7 @@ def test_discover_config_from_env(monkeypatch):
         "topicA": {"a": 0},
         "topicB": {"b": 1}
     }
-    actual = misc.discover_config(name="test", logger=logger)
+    actual = misc.discover_config(name="test", use_prefix=True, logger=logger)
 
     assert actual == expected
 
@@ -37,7 +37,7 @@ def test_discover_config_from_env_missing(monkeypatch):
     monkeypatch.setenv("TEST_NONE_CONFIG", "tests")
 
     with pytest.raises(misc.MissingConfigurationFile):
-        misc.discover_config(name="test_none", logger=logger)
+        misc.discover_config(name="test_none", use_prefix=True, logger=logger)
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
@@ -45,7 +45,7 @@ def test_discover_config_from_env_malformed(monkeypatch):
     monkeypatch.setenv("TEST_MALFORMED_CONFIG", "tests")
 
     with pytest.raises(misc.BadConfigurationFile):
-        misc.discover_config(name="test_malformed", logger=logger)
+        misc.discover_config(name="test_malformed", use_prefix=True, logger=logger)
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
@@ -53,16 +53,16 @@ def test_discover_config_from_env_empty(monkeypatch):
     monkeypatch.setenv("TEST_EMPTY_CONFIG", "tests")
 
     with pytest.raises(misc.BadConfigurationFile):
-        misc.discover_config(name="test_empty", logger=logger)
+        misc.discover_config(name="test_empty", use_prefix=True, logger=logger)
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def test_discover_config():
+def test_discover_config_location_use_prefix():
     expected = {
         "topicA": {"a": 0},
         "topicB": {"b": 1}
     }
-    actual = misc.discover_config(name="test", logger=logger, dir_="tests")
+    actual = misc.discover_config(name="test.extension", use_prefix=True, location="tests", logger=logger)
 
     assert actual == expected
 

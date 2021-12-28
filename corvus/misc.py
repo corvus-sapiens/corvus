@@ -229,7 +229,7 @@ def get_xxhash32(path: str) -> str:
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool = True, dir_: str = "") -> dict:
+def discover_config(name: str, logger: logging.LoggerAdapter, use_prefix: bool = False, location: str = "") -> dict:
     """
     Look for a given filename in typical locations and parse it as a JSON file.
     First of all, the function will attempt to look in the directory defined in
@@ -237,10 +237,11 @@ def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool 
 
     :param name: name of the configuration file
     :param logger: a logging.LoggerAdapter instance
-    :param from_prefix: build a config file name by replacing the extension with '.cfg.json'
+    :param use_prefix: replace extension from `name` with .cfg.json
+    :param location: look in this directory first
     :return: a dictionary representation of a JSON file
     """
-    if from_prefix:
+    if use_prefix:
         prefix = os.path.splitext(os.path.basename(name))[0]
         file_name = f"{prefix}.cfg.json"
     else:
@@ -253,7 +254,8 @@ def discover_config(name: str, logger: logging.LoggerAdapter, from_prefix: bool 
     locations = filter(
         lambda d: d is not None and os.path.isdir(d),
         set((
-            dir_,
+        (
+            location,
             os.environ.get(f"{prefix.upper()}_CONFIG") or "",
             os.path.abspath(os.curdir),
             os.path.expanduser("~"),
