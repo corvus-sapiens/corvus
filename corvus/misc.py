@@ -276,7 +276,7 @@ def discover_config(name: str, logger: logging.LoggerAdapter, use_prefix: bool =
                 except Exception as error:
                     err_message = f"Failed to parse configuration file: '{path_config}'"
                     logger.critical(f"{err_message} ({repr(error)}). Aborting.")
-                    raise BadConfigurationFile(err_message, path_config)
+                    raise BadConfigurationFile(err_message, path_config) from error
         except IOError:
             logger.debug(f"'{file_name}' not found under: '{location}'; trying next location ...")
 
