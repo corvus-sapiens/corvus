@@ -397,6 +397,8 @@ def get_file_report(path: str, magic_bytes: int = 2048) -> FileReport:
     report["created"] = dt.strftime(dt.fromtimestamp(ctime), "%Y-%m-%d %H:%M:%S")
     report["modified"] = dt.strftime(dt.fromtimestamp(mtime), "%Y-%m-%d %H:%M:%S")
 
+    ## Make sure we are not sampling more bytes than there are
+    sample_bytes = min(sample_bytes, status.st_size - 8)
     with open(path, "rb") as file:
         report["description"] = magic.from_buffer(file.read(sample_bytes))
         report["mime"] = magic.from_buffer(file.read(sample_bytes), mime=True)
