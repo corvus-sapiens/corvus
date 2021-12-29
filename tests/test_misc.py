@@ -148,6 +148,22 @@ def test_get_file_report_txt():
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def test_get_file_report_txt_too_many_magic_bytes():
+    expected = misc.FileReport(
+        exists=True,
+        bytes=2940,
+        human="2.94 KB",
+        description="ASCII text, with very long lines",
+        mime="text/plain",
+        created="2021-12-11 17:45:37",
+        modified="2021-12-11 17:45:37"
+    )
+
+    actual = misc.get_file_report("tests/lorem-ipsum.txt", sample_bytes=4096)
+    assert expected == actual
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
 def test_get_file_report_non_existent():
     expected = misc.FileReport(
         exists=False,

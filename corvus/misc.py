@@ -366,9 +366,9 @@ def get_bin_version(path: str, logger: logging.LoggerAdapter) -> str:
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def get_file_report(path: str) -> FileReport:
-    """Build a comment on a path, including size, other (optional) info and attach a message.
+def get_file_report(path: str, magic_bytes: int = 2048) -> FileReport:
     :param path: path to be analyzed
+    :param sample_bytes: sample that many bytes before guessing the MIME type
     :returns: Dict containing information about the file under the `path`
     """
     report = {
@@ -398,7 +398,7 @@ def get_file_report(path: str) -> FileReport:
     report["modified"] = dt.strftime(dt.fromtimestamp(mtime), "%Y-%m-%d %H:%M:%S")
 
     with open(path, "rb") as file:
-        report["description"] = magic.from_buffer(file.read(2048))
-        report["mime"] = magic.from_buffer(file.read(2048), mime=True)
+        report["description"] = magic.from_buffer(file.read(sample_bytes))
+        report["mime"] = magic.from_buffer(file.read(sample_bytes), mime=True)
 
     return FileReport(**report)
