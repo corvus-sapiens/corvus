@@ -366,7 +366,7 @@ def get_bin_version(path: str, logger: logging.LoggerAdapter) -> str:
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def get_file_report(path: str, sample_bytes: int = 2048) -> FileReport:
+def get_file_report(path: str, sample_bytes: int = 0) -> FileReport:
     """Gather file stats like size, creation/modification time and MIME type.
     :param path: path to be analyzed
     :param sample_bytes: sample that many bytes before guessing the MIME type
@@ -384,8 +384,8 @@ def get_file_report(path: str, sample_bytes: int = 2048) -> FileReport:
 
     if not os.path.isfile(path):
         return FileReport(**report)
-    else:
-        report["exists"] = True
+
+    report["exists"] = True
 
     status = os.stat(path)
 
@@ -399,9 +399,13 @@ def get_file_report(path: str, sample_bytes: int = 2048) -> FileReport:
     report["modified"] = dt.strftime(dt.fromtimestamp(mtime), "%Y-%m-%d %H:%M:%S")
 
     ## Make sure we are not sampling more bytes than there are
-    sample_bytes = min(sample_bytes, status.st_size - 8)
-    with open(path, "rb") as file:
-        report["description"] = magic.from_buffer(file.read(sample_bytes))
-        report["mime"] = magic.from_buffer(file.read(sample_bytes), mime=True)
+    if sample_bytes:
+        sample_bytes = min(sample_bytes, status.st_size - 8)
+        with open(path, "rb") as file:
+            report["description"] = magic.from_buffer(file.read(sample_bytes))
+            report["mime"] = magic.from_buffer(file.read(sample_bytes), mime=True)
+    else:
+        report["description"] = magic.from_file(path)
+        report["mime"] = magic.from_file(path, mime=True)
 
     return FileReport(**report)
