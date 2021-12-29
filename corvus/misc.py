@@ -4,7 +4,8 @@ import json
 import logging
 import os
 import shutil
-from typing import Dict
+from os.path import basename, dirname
+from typing import Dict, List
 from collections import namedtuple
 from datetime import datetime as dt
 
@@ -229,39 +230,41 @@ def get_xxhash32(path: str) -> str:
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def discover_config(name: str, logger: logging.LoggerAdapter, use_prefix: bool = False, location: str = "") -> dict:
+def get_json_config(which: str, logger: logging.LoggerAdapter, discover: bool = False, from_prefix: bool = False) -> dict:
     """
     Look for a given filename in typical locations and parse it as a JSON file.
     First of all, the function will attempt to look in the directory defined in
     the <PREFIX>_CONFIG env variable, where <PREFIX> is the extensionless `name`.
 
-    :param name: name of the configuration file
+    :param which: path or just the filename of the configuration file
+    :param discover: attempt to find the config file under standard POSIX locations
     :param logger: a logging.LoggerAdapter instance
-    :param use_prefix: replace extension from `name` with .cfg.json
-    :param location: look in this directory first
+    :param from_prefix: replace extension from `name` with .cfg.json
     :return: a dictionary representation of a JSON file
     """
-    if use_prefix:
-        prefix = os.path.splitext(os.path.basename(name))[0]
+    file_name = basename(which)
+    locations: List[str] = [dirname(which)]
+    prefix = ""
+
+    if from_prefix:
+        prefix = os.path.splitext(os.path.basename(which))[0]
         file_name = f"{prefix}.cfg.json"
-    else:
-        prefix = ""
-        file_name = name
+
+    if discover:
+        ## Add valid paths from the following tuple
+        locations += list(filter(
+            os.path.isdir,
+            (
+                os.environ.get("CONFIG_DIR") or "",
+                os.path.abspath(os.curdir),
+                os.path.expanduser("~"),
+                os.path.expanduser(f"~/.local/share/{prefix}"),
+                f"/etc/{prefix}"
+            )
+        ))
 
     logger.debug(f"Expecting a configuration file with name: '{file_name}'")
 
-    ## Choose valid paths from the following tuple
-    locations = filter(
-        lambda d: d is not None and os.path.isdir(d),
-        (
-            location,
-            os.environ.get(f"{prefix.upper()}_CONFIG") or "",
-            os.path.abspath(os.curdir),
-            os.path.expanduser("~"),
-            os.path.expanduser(f"~/.local/share/{prefix}"),
-            f"/etc/{prefix}"
-        )
-    )
 
     ## Look for the file in each valid location
     for location in locations:

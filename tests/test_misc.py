@@ -21,48 +21,59 @@ def test_get_xxhash():
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def test_discover_config_from_env(monkeypatch):
-    monkeypatch.setenv("TEST_CONFIG", "tests")
+def test_get_json_config():
     expected = {
         "topicA": {"a": 0},
         "topicB": {"b": 1}
     }
-    actual = misc.discover_config(name="test", use_prefix=True, logger=logger)
+    actual = misc.get_json_config(which="tests/test.cfg.json", logger=logger)
 
     assert actual == expected
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def test_discover_config_from_env_missing(monkeypatch):
-    monkeypatch.setenv("TEST_NONE_CONFIG", "tests")
-
-    with pytest.raises(misc.MissingConfigurationFile):
-        misc.discover_config(name="test_none", use_prefix=True, logger=logger)
-
-
-## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def test_discover_config_from_env_malformed(monkeypatch):
-    monkeypatch.setenv("TEST_MALFORMED_CONFIG", "tests")
-
-    with pytest.raises(misc.BadConfigurationFile):
-        misc.discover_config(name="test_malformed", use_prefix=True, logger=logger)
-
-
-## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def test_discover_config_from_env_empty(monkeypatch):
-    monkeypatch.setenv("TEST_EMPTY_CONFIG", "tests")
-
-    with pytest.raises(misc.BadConfigurationFile):
-        misc.discover_config(name="test_empty", use_prefix=True, logger=logger)
-
-
-## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def test_discover_config_location_use_prefix():
+def test_get_json_config_from_env(monkeypatch):
+    monkeypatch.setenv("CONFIG_DIR", "tests")
     expected = {
         "topicA": {"a": 0},
         "topicB": {"b": 1}
     }
-    actual = misc.discover_config(name="test.extension", use_prefix=True, location="tests", logger=logger)
+    actual = misc.get_json_config(which="test", discover=True, from_prefix=True, logger=logger)
+
+    assert actual == expected
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def test_get_json_config_from_env_missing(monkeypatch):
+    monkeypatch.setenv("CONFIG_DIR", "tests")
+
+    with pytest.raises(misc.MissingConfigurationFile):
+        misc.get_json_config(which="test_none", from_prefix=True, logger=logger)
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def test_get_json_config_from_env_malformed(monkeypatch):
+    monkeypatch.setenv("CONFIG_DIR", "tests")
+
+    with pytest.raises(misc.BadConfigurationFile):
+        misc.get_json_config(which="test_malformed", discover=True, from_prefix=True, logger=logger)
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def test_get_json_config_from_env_empty(monkeypatch):
+    monkeypatch.setenv("CONFIG_DIR", "tests")
+
+    with pytest.raises(misc.BadConfigurationFile):
+        misc.get_json_config(which="test_empty", discover=True, from_prefix=True, logger=logger)
+
+
+## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
+def test_get_json_config_location_from_prefix():
+    expected = {
+        "topicA": {"a": 0},
+        "topicB": {"b": 1}
+    }
+    actual = misc.get_json_config(which="tests/test.extension", from_prefix=True, logger=logger)
 
     assert actual == expected
 
