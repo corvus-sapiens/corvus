@@ -366,7 +366,7 @@ def get_bin_version(path: str, logger: logging.LoggerAdapter) -> str:
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
-def get_file_report(path: str, magic_bytes: int = 2048) -> FileReport:
+def get_file_report(path: str, sample_bytes: int = 2048) -> FileReport:
     :param path: path to be analyzed
     :param sample_bytes: sample that many bytes before guessing the MIME type
     :returns: Dict containing information about the file under the `path`
