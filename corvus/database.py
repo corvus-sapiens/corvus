@@ -141,7 +141,7 @@ def parse_pgpass(path: str, logger: logging.LoggerAdapter = None) -> dict:
             logger.error(err_message)
         else:
             sys.stderr.write(f"{err_message}\n")
-        return {}
+        raise
 
 
 ## ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ##
