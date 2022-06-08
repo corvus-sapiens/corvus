@@ -1,7 +1,7 @@
 """Convenience tools for better logging."""
 
 __author__ = "Alexander Gorelyshev"
-__email__ = "alexander.gorelyshev"
+__email__ = "alexander.gorelyshev@pm.me"
 
 import os
 import logging
@@ -22,7 +22,8 @@ class ColoredFormatter(logging.Formatter):
     def __init__(self, fmt: str):
         super().__init__(
             fmt=fmt,
-            datefmt="%d-%m-%Y %H:%M:%S")
+            datefmt="%d-%m-%Y %H:%M:%S"
+        )
 
     def format(self, record: logging.LogRecord) -> str:
         """Override the format function of logging.Formatter to support colour output"""
@@ -56,9 +57,11 @@ def get_colored_logger(
         persist: bool = True,
         pid: bool = False
 ) -> logging.LoggerAdapter:
-    """Instantiate a logger that colors messages based on their log level.
+    """
+    Instantiate a logger that colors messages based on their log level.
+    
     :param scriptname: name to be displayed as the origin for log messages
-    :param log_dir: where to put log messages in the filesystem
+    :param log_dir: where to put log messages in the filesystem, defaults to "./logs"
     :param level: minimum level of messages to log (defaults to DEBUG)
     :param to_stdout: redirect messages to stdandatd output regardless of their level
     :param persist: whether to save log messages to the filesystem
